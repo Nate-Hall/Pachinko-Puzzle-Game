@@ -20,6 +20,10 @@ public class LevelEditor : MonoBehaviour {
 	int[,] gridValues;
 	public ColourDetails[] colourDetails = new ColourDetails[5];
 
+	bool canEdit = true;
+
+	int currentColour = 0;
+
 	// Use this for initialization
 	void Start () {
 		GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -33,26 +37,27 @@ public class LevelEditor : MonoBehaviour {
 
 		colourDetails[0].name = "Tile Background";
 		colourDetails[1].name = "Border";
-		colourDetails[2].name = "Obstacles";
+		colourDetails[2].name = "Obstacle";
 		colourDetails[3].name = "Ball";
 		colourDetails[4].name = "Goal";
 	}
 
 	// Use this for initialization
 	void Update() {
-		if(Input.GetMouseButton(0)) {
+		if(Input.GetMouseButton(0) && canEdit) {
 
 			Vector2 arrayPos = CalculateArrayPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition));
 			if (arrayPos.x > -1) {
 
-				arrayPos = new Vector2((gridValues.GetLength(0) - 1) * arrayPos.x, (gridValues.GetLength(1) - 1) * arrayPos.y);
+				arrayPos = new Vector2(gridValues.GetLength(0) * arrayPos.x, gridValues.GetLength(1) * arrayPos.y);
 
-				UpdateColourGrid((int)arrayPos.x, (int)arrayPos.y, 3);
+				UpdateColourGrid((int)arrayPos.x, (int)arrayPos.y, currentColour);
 			}
-			
+
+			levelEditorGridMaterial.mainTexture = GenerateTexture();
 		}
 
-		levelEditorGridMaterial.mainTexture = GenerateTexture();
+		
 	}
 
 	Vector2 CalculateArrayPosition(Vector3 mousePos) {
@@ -72,7 +77,9 @@ public class LevelEditor : MonoBehaviour {
 	}
 
 	void UpdateColourGrid(int x, int y, int currentColor) {
-		gridValues[x, y] = currentColor;
+		if (gridValues[x, y] != 1) {
+			gridValues[x, y] = currentColor;
+		}
 	}
 
 	private void OnValidate() {
@@ -92,6 +99,8 @@ public class LevelEditor : MonoBehaviour {
 				gridValues[i, y] = 1;
 			}
 		}
+
+		levelEditorGridMaterial.mainTexture = GenerateTexture();
 	}
 
 	public void SaveGrid(string filename) {
@@ -101,7 +110,7 @@ public class LevelEditor : MonoBehaviour {
 			for (int x = 0; x < gridValues.GetLength(0); x++) {
 				StringBuilder line = new StringBuilder();
 				for (int y = 0; y < gridValues.GetLength(1); y++) {
-					line.Append(gridValues[x, y].ToString()).Append(" ");
+					line.Append(gridValues[y, gridValues.GetLength(0) - 1 - x].ToString()).Append(" ");
 				}
 				linesToWrite.Add(line.ToString());
 			}
@@ -111,6 +120,7 @@ public class LevelEditor : MonoBehaviour {
 
 	Texture2D GenerateTexture() {
 		Texture2D tex = new Texture2D(gridValues.GetLength(0), gridValues.GetLength(1));
+		tex.filterMode = FilterMode.Point;
 
 		for (int x = 0; x < gridValues.GetLength(0); x++) {
 			for (int y = 0; y < gridValues.GetLength(1); y++) {
@@ -121,6 +131,20 @@ public class LevelEditor : MonoBehaviour {
 		tex.Apply();
 		return tex;
 	}
+
+	
+
+	public void SetCanEdit(bool canEdit) {
+		this.canEdit = canEdit;
+	}
+
+
+
+	public void SetCurrentColour(int newColour) {
+		currentColour = newColour;
+	}
+
+
 
 	[System.Serializable]
 	public struct ColourDetails {

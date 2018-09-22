@@ -5,7 +5,7 @@ using UnityEngine;
 public class LevelEditorUI : MonoBehaviour {
 
 	bool textPromptUp = false;
-	public string filename = "";
+	string filename = "";
 
 	private void OnGUI() {
 
@@ -30,11 +30,33 @@ public class LevelEditorUI : MonoBehaviour {
 
 
 
-	public void OnSaveButtonClicked(string filename) {
+	public void OnSaveButtonClicked() {
+		GetComponent<LevelEditor>().SetCanEdit(false);
+	}
+
+
+
+	public void SetFilename(string filename) {
 		this.filename = filename;
-		if (!textPromptUp) {
-			textPromptUp = true;
-		}
+	}
+
+
+
+	public void OnSaveOkButtonClicked() {
+		GetComponent<LevelEditor>().SaveGrid(filename);
+		GetComponent<LevelEditor>().SetCanEdit(true);
+	}
+
+
+
+	public void OnSaveCancelButtonClicked() {
+		GetComponent<LevelEditor>().SetCanEdit(true);
+	}
+
+
+
+	public void OnLoadButtonClicked() {
+		//TODO Add loading function
 	}
 
 }
