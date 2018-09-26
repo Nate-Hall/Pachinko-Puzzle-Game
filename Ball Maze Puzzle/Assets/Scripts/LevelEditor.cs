@@ -110,12 +110,42 @@ public class LevelEditor : MonoBehaviour {
 			for (int x = 0; x < gridValues.GetLength(0); x++) {
 				StringBuilder line = new StringBuilder();
 				for (int y = 0; y < gridValues.GetLength(1); y++) {
-					line.Append(gridValues[y, gridValues.GetLength(0) - 1 - x].ToString()).Append(" ");
+					if (y != gridValues.GetLength(1) - 1) {
+						line.Append(gridValues[y, gridValues.GetLength(0) - 1 - x].ToString()).Append(" ");
+					} else {
+						line.Append(gridValues[y, gridValues.GetLength(0) - 1 - x].ToString());
+					}
 				}
 				linesToWrite.Add(line.ToString());
 			}
 			System.IO.File.WriteAllLines("Assets/Resources/" + filename + ".txt", linesToWrite.ToArray());
 		}
+	}
+
+
+
+	public void LoadGrid(string filename) {
+		// convert text to array and load
+		int x = 0;
+		int y = gridValues.GetLength(1) - 1;
+		string line;
+
+		// Read the file and display it line by line.  
+		System.IO.StreamReader file = new System.IO.StreamReader("Assets/Resources/" + filename + ".txt");
+		while ((line = file.ReadLine()) != null) {
+			foreach(string str in line.Split(' ')) {
+				if (str != " ") {
+					gridValues[x, y] = int.Parse(str);
+					x++;
+				}
+			}
+			x = 0;
+			y--;
+		}
+
+		file.Close();
+
+		levelEditorGridMaterial.mainTexture = GenerateTexture();
 	}
 
 	Texture2D GenerateTexture() {

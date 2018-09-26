@@ -49,14 +49,21 @@ public class LevelEditorUI : MonoBehaviour {
 
 
 
-	public void OnSaveCancelButtonClicked() {
+	public void OnSubMenuCancelButtonClicked() {
 		GetComponent<LevelEditor>().SetCanEdit(true);
 	}
 
 
 
 	public void OnLoadButtonClicked() {
-		//TODO Add loading function
+		GetComponent<LevelEditor>().SetCanEdit(false);
+	}
+
+
+
+	public void OnLoadOkButtonClicked() {
+		GetComponent<LevelEditor>().LoadGrid(filename);
+		GetComponent<LevelEditor>().SetCanEdit(true);
 	}
 
 }
