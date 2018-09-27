@@ -40,6 +40,9 @@ public class LevelEditor : MonoBehaviour {
 		colourDetails[2].name = "Obstacle";
 		colourDetails[3].name = "Ball";
 		colourDetails[4].name = "Goal";
+
+		//debug
+		//LevelMeshGenerator.CreateObstacleObject();
 	}
 
 	// Use this for initialization
