@@ -4,12 +4,12 @@ using UnityEngine;
 
 public static class LevelMeshGenerator {
 
-	const float obstacleFrontZ = -0.5f;
+	const float obstacleFrontZ = -0.1f;
 	const float obstacleBackZ = 0;
 
 
 
-	public static GameObject CreateObstacleObject() {
+	public static GameObject CreateObstacleObject(Vector2[] obstacleCoords) {
 		GameObject obstacle = new GameObject("Obstacle");
 		MeshFilter meshFilter = obstacle.AddComponent<MeshFilter>();
 		obstacle.AddComponent<MeshRenderer>();
@@ -26,15 +26,15 @@ public static class LevelMeshGenerator {
 		//Vertices//
 
 		//debug
-		Vector2[] obstacleCoords = new Vector2[] {
+		/*obstacleCoords = new Vector2[] {
 				new Vector2(-1, 1),
 				new Vector2(-0.7f, 1),
 				new Vector2(0.7f, -0.7f),
 				new Vector2(1, -0.7f),
 				new Vector2(1, -1),
 				new Vector2(-1, -1)
-		};
-
+		};*/
+		MorphObstacleToConvexShape(obstacleCoords);
 		newVertices = GenerateVertices(obstacleCoords);
 		newTriangles = GenerateTriangles(obstacleCoords);
 		newUV = GenerateUVs(obstacleCoords);
@@ -106,7 +106,7 @@ public static class LevelMeshGenerator {
 		//Front face//
 
 		for (int i = 0; i < points.Length - 2; i++) {
-			if (i < 2) {
+			if (i < 2 && i != points.Length - 3) {
 				triangles[vertexIndex] = currentVertex;
 				triangles[vertexIndex + 1] = currentVertex + 1;
 				triangles[vertexIndex + 2] = currentVertex + 2;
@@ -116,6 +116,7 @@ public static class LevelMeshGenerator {
 				triangles[vertexIndex + 1] = currentVertex + 1;
 				triangles[vertexIndex + 2] = currentVertex - i;
 			} else {
+				if (points.Length == 4 /*maybe is even*/) currentVertex++; //This might be dumb
 				triangles[vertexIndex] = currentVertex;
 				triangles[vertexIndex + 1] = currentVertex - points.Length + 1;
 				triangles[vertexIndex + 2] = currentVertex - i;
@@ -127,7 +128,7 @@ public static class LevelMeshGenerator {
 		//Back face//
 
 		for (int i = 0; i < points.Length - 2; i++) {
-			if (i < 2) {
+			if (i < 2 && i != points.Length - 3) {
 				triangles[vertexIndex] = currentVertex;
 				triangles[vertexIndex + 1] = currentVertex + 1;
 				triangles[vertexIndex + 2] = currentVertex + 2;
@@ -162,6 +163,37 @@ public static class LevelMeshGenerator {
 		}
 
 		return triangles;
+	}
+
+
+
+	static Vector2[] MorphObstacleToConvexShape(Vector2[] obstacleCoords) {
+		Vector2[] oldPoints = obstacleCoords;
+		Queue<Vector2> newPoints = new Queue<Vector2>();
+
+		Vector2 previousPoint = new Vector2();
+		Vector2 nextPoint = new Vector2();
+
+		for (int i = 0; i < oldPoints.Length; i++) {
+			if(i != oldPoints.Length - 1) {
+				nextPoint = oldPoints[i + 1];
+			} else {
+				nextPoint = oldPoints[0];
+			}
+
+			if(previousPoint != null) {
+				if (Vector3.Cross((oldPoints[i] - previousPoint).normalized, (nextPoint - oldPoints[i]).normalized).z < 0) {
+					//Is right turn or straight
+					newPoints.Enqueue(oldPoints[i]);
+					previousPoint = oldPoints[i];
+				}
+			} else {
+				newPoints.Enqueue(oldPoints[i]);
+				previousPoint = oldPoints[i];
+			}
+		}
+
+		return newPoints.ToArray();
 	}
 
 
