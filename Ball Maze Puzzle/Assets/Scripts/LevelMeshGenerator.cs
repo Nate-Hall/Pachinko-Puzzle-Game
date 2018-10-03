@@ -97,7 +97,8 @@ public static class LevelMeshGenerator {
 
 
 	static int[] GenerateTriangles(Vector2[] points) {
-		int[] triangles = new int[(points.Length - 1) * 12];
+		//Something is seriously wrong here
+		int[] triangles = new int[((((points.Length * 2) - 2) * 8) + ((points.Length * 2) * 2)) * 3];
 
 		int currentVertex = 0;
 
@@ -105,7 +106,7 @@ public static class LevelMeshGenerator {
 
 		//Front face//
 
-		for (int i = 0; i < points.Length - 2; i++) {
+		for (int i = 0; i < (((points.Length / 6) - 2) * 12); i++) {
 			if (i < 2 && i != points.Length - 3) {
 				triangles[vertexIndex] = currentVertex;
 				triangles[vertexIndex + 1] = currentVertex + 1;
@@ -127,7 +128,7 @@ public static class LevelMeshGenerator {
 
 		//Back face//
 
-		for (int i = 0; i < points.Length - 2; i++) {
+		for (int i = 0; i < (((points.Length / 6) - 2) * 12); i++) {
 			if (i < 2 && i != points.Length - 3) {
 				triangles[vertexIndex] = currentVertex;
 				triangles[vertexIndex + 1] = currentVertex + 1;
@@ -148,7 +149,7 @@ public static class LevelMeshGenerator {
 
 		//Side faces//
 
-		for (int i = 0; i < points.Length; i++) {
+		for (int i = 0; i < ((points.Length / 6) * 6); i++) {
 			for (int j = 0; j < 3; j++) {
 				triangles[vertexIndex + j] = currentVertex;
 				currentVertex++;

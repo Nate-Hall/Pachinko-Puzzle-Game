@@ -286,9 +286,11 @@ public class LevelEditor : MonoBehaviour {
 				}
 			}
 
-		} while (nextX != startX || nextY != startY);
+		} while (nextX != startX || nextY != startY);		
 
-		LevelMeshGenerator.CreateObstacleObject(obstacleCoords.ToArray());
+		//Vector2[] obstaclePoints = ExtendEdgesOfVertices(obstacleCoords);
+		Vector2[] obstaclePoints = obstacleCoords.ToArray();
+		LevelMeshGenerator.CreateObstacleObject(obstaclePoints);
 	}
 
 
@@ -328,43 +330,57 @@ public class LevelEditor : MonoBehaviour {
 
 
 
-	Queue<Vector2> ExtendEdgesOfVertices(Queue<Vector2> obstacleCoords) {
+	Vector2[] ExtendEdgesOfVertices(Queue<Vector2> obstacleCoords) {
 		float minX = obstacleCoords.Peek().x;
 		float maxX = obstacleCoords.Peek().x;
 		float minY = obstacleCoords.Peek().y;
 		float maxY = obstacleCoords.Peek().y;
 
-		foreach(Vector2 vertex in obstacleCoords) {
-			if(vertex.x < minX) {
-				minX = vertex.x;
+		Vector2[] points = obstacleCoords.ToArray();
+
+		for (int i = 0; i < points.Length; i++) {
+			if(points[i].x < minX) {
+				minX = points[i].x;
 			}
-			if (vertex.x > maxX) {
-				maxX = vertex.x;
+			if (points[i].x > maxX) {
+				maxX = points[i].x;
 			}
-			if (vertex.y < minY) {
-				minY = vertex.y;
+			if (points[i].y < minY) {
+				minY = points[i].y;
 			}
-			if (vertex.y > maxY) {
-				maxY = vertex.y;
+			if (points[i].y > maxY) {
+				maxY = points[i].y;
 			}
 		}
 
-		foreach (Vector2 vertex in obstacleCoords) {
+		for (int i = 0; i < points.Length; i++) {
 
-			//This doesn't work for straight obstacles
-			if (vertex.x == minX) {
-				minX = vertex.x;
-			} else if (vertex.x == maxX) {
-				maxX = vertex.x;
+			if (minX == maxX) {
+				if(i < points.Length/2) {
+					points[i].Set(points[i].x + halfPixelSize.x, points[i].y);
+				} else {
+					points[i].Set(points[i].x - halfPixelSize.x, points[i].y);
+				}
+			} else if (points[i].x == minX) {
+				points[i].Set(points[i].x - halfPixelSize.x, points[i].y);
+			} else if (points[i].x == maxX) {
+				points[i].Set(points[i].x + halfPixelSize.x, points[i].y);
 			}
-			if (vertex.y == minY) {
-				minY = vertex.y;
-			} else if (vertex.y == maxY) {
-				maxY = vertex.y;
+
+			if (minY == maxY) {
+				if (i < points.Length / 2) {
+					points[i].Set(points[i].y, points[i].y + halfPixelSize.y);
+				} else {
+					points[i].Set(points[i].y, points[i].y - halfPixelSize.y);
+				}
+			} else if (points[i].y == minY) {
+				points[i].Set(points[i].y, points[i].y - halfPixelSize.y);
+			} else if (points[i].y == maxY) {
+				points[i].Set(points[i].y, points[i].y + halfPixelSize.y);
 			}
 		}
 
-		return obstacleCoords;
+		return points;
 	}
 
 
