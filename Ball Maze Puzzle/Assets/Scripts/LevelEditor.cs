@@ -222,71 +222,126 @@ public class LevelEditor : MonoBehaviour {
 
 		Queue<Vector2> obstacleCoords = new Queue<Vector2>();
 		int currentX = startX;
-		int currentY = startY;
-		int nextX = -1;
-		int nextY = -1;
-		int directionCount = 0;
-		int previousDirectionCount = -1;
+		int currentTopY = startY;
+		int currentBottomY = startY;
+		int currentVertexSide = -1;
 
-		obstacleCoords = AddVerticesOfPixelToQueue(obstacleCoords, startX, startY, directionCount, previousDirectionCount);
+		// First Column check //
 
-		do {
-			switch (directionCount) {
-				case 0:
-					nextX = currentX;
-					nextY = currentY - 1;
-					break;
-				case 1:
-					nextX = currentX + 1;
-					nextY = currentY - 1;
-					break;
-				case 2:
-					nextX = currentX + 1;
-					nextY = currentY;
-					break;
-				case 3:
-					nextX = currentX + 1;
-					nextY = currentY + 1;
-					break;
-				case 4:
-					nextX = currentX;
-					nextY = currentY + 1;
-					break;
-				case 5:
-					nextX = currentX - 1;
-					nextY = currentY + 1;
-					break;
-				case 6:
-					nextX = currentX - 1;
-					nextY = currentY;
-					break;
-				case 7:
-					nextX = currentX - 1;
-					nextY = currentY - 1;
-					break;
+		if(CheckPixelInDirectionForObstacle(startX+1, startY-1)) {
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, startY, -1, -1));
+		} else {
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, startY, -1, 1));
+		}
+
+		while(CheckPixelInDirectionForObstacle(currentX, currentBottomY + 1)) {
+			currentBottomY++;
+		}
+		obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, currentBottomY, -1, -1));
+
+		if (CheckPixelInDirectionForObstacle(startX + 1, startY - 1)) {
+			currentTopY--;
+		} else {
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, startY, 1, 1));
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, currentBottomY, 1, -1));
+			currentVertexSide = 1;
+		}
+		currentX++;
+
+		// Other Columns //
+
+		bool endOfObstacle = false;
+
+		while(!endOfObstacle) {
+			currentTopY--;
+			currentBottomY++;
+			endOfObstacle = true;
+
+			if(currentTopY > currentBottomY) {
+				break;
 			}
 
-			if (CheckPixelInDirectionForObstacle(nextX, nextY)) {
-				obstacleCoords = AddVerticesOfPixelToQueue(obstacleCoords, nextX, nextY, directionCount, previousDirectionCount);
-				previousDirectionCount = directionCount;
-				currentX = nextX;
-				currentY = nextY;
-				if (directionCount > 1) {
-					directionCount -= 2;
-				} else {
-					directionCount = 0;
-				}
-			} else {
-				if (directionCount > 7) {
-					nextX = startX;
-					nextY = startY;
-					obstacleCoords = AddAllVerticesOfPixelToQueue(startX, startY);
-				} else {
-					directionCount++;
+			for (int y = currentTopY-2; y < currentBottomY+1; y++) {
+				if(CheckPixelInDirectionForObstacle(currentX, y + 1)) {
+					obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, y+1, currentVertexSide, 1));
+					currentTopY = y + 1;
+					endOfObstacle = false;
+					for (y = currentBottomY + 2; y > currentTopY - 1; y--) {
+						if (CheckPixelInDirectionForObstacle(currentX, y - 1)) {
+							obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, y - 1, currentVertexSide, 1));
+							currentBottomY = y - 1;
+							break;
+						}
+					}
+					break;
 				}
 			}
 
-		} while (nextX != startX || nextY != startY);		
+			currentX++;
+		}
+
+		//int directionCount = 0;
+		//int previousDirectionCount = -1;
+
+		//obstacleCoords = AddVerticesOfPixelToQueue(obstacleCoords, startX, startY, directionCount, previousDirectionCount);
+
+		//do {
+		//	switch (directionCount) {
+		//		case 0:
+		//			nextX = currentX;
+		//			nextY = currentY - 1;
+		//			break;
+		//		case 1:
+		//			nextX = currentX + 1;
+		//			nextY = currentY - 1;
+		//			break;
+		//		case 2:
+		//			nextX = currentX + 1;
+		//			nextY = currentY;
+		//			break;
+		//		case 3:
+		//			nextX = currentX + 1;
+		//			nextY = currentY + 1;
+		//			break;
+		//		case 4:
+		//			nextX = currentX;
+		//			nextY = currentY + 1;
+		//			break;
+		//		case 5:
+		//			nextX = currentX - 1;
+		//			nextY = currentY + 1;
+		//			break;
+		//		case 6:
+		//			nextX = currentX - 1;
+		//			nextY = currentY;
+		//			break;
+		//		case 7:
+		//			nextX = currentX - 1;
+		//			nextY = currentY - 1;
+		//			break;
+		//	}
+
+		//	if (CheckPixelInDirectionForObstacle(nextX, nextY)) {
+		//		obstacleCoords = AddVerticesOfPixelToQueue(obstacleCoords, nextX, nextY, directionCount, previousDirectionCount);
+		//		previousDirectionCount = directionCount;
+		//		currentX = nextX;
+		//		currentY = nextY;
+		//		if (directionCount > 1) {
+		//			directionCount -= 2;
+		//		} else {
+		//			directionCount = 0;
+		//		}
+		//	} else {
+		//		if (directionCount > 7) {
+		//			nextX = startX;
+		//			nextY = startY;
+		//			obstacleCoords = AddAllVerticesOfPixelToQueue(startX, startY);
+		//		} else {
+		//			directionCount++;
+		//		}
+		//	}
+
+		//} while (nextX != startX || nextY != startY);		
 
 		//Vector2[] obstaclePoints = ExtendEdgesOfVertices(obstacleCoords);
 		Vector2[] obstaclePoints = obstacleCoords.ToArray();
@@ -307,12 +362,16 @@ public class LevelEditor : MonoBehaviour {
 
 
 
-	Queue<Vector2> AddVerticesOfPixelToQueue(Queue<Vector2> currentVertices, int pixelX, int pixelY, int directionCount, int previousDirectionCount) {
-		Queue<Vector2> newVertices = currentVertices;
+	Vector2 AddVertexOfPixelToQueue(int pixelX, int pixelY, int directionX, int directionY) {
+		//Debug
+		Transform obj = GameObject.CreatePrimitive(PrimitiveType.Sphere).transform;
+		obj.position = new Vector2(originMin.x + halfPixelSize.x +(halfPixelSize.x * pixelX * 2) + (directionX * halfPixelSize.x), originMin.y + halfPixelSize.y + (halfPixelSize.y * pixelY * 2) + (directionY * halfPixelSize.y));
+		obj.localScale = Vector3.one * 0.01f;
+		obj.GetComponent<Renderer>().material.color = Color.blue;
+		//EndDebug
 
-		newVertices.Enqueue(new Vector2(originMin.x + (halfPixelSize.x * pixelX * 2), originMin.y + (halfPixelSize.y * pixelY * 2)));
+		return new Vector2(originMin.x + halfPixelSize.x + (halfPixelSize.x * pixelX * 2) + (directionX * halfPixelSize.x), originMin.y + halfPixelSize.y + (halfPixelSize.y * pixelY * 2) + (directionY * halfPixelSize.y));
 
-		return newVertices;
 	}
 
 
