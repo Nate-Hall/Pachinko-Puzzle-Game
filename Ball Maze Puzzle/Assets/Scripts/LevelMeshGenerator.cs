@@ -13,11 +13,13 @@ public static class LevelMeshGenerator {
 		GameObject obstacle = new GameObject("Obstacle");
 		MeshFilter meshFilter = obstacle.AddComponent<MeshFilter>();
 		obstacle.AddComponent<MeshRenderer>();
+		MeshCollider collider = obstacle.AddComponent<MeshCollider>();
 		//Add once called from outside class
 		//Put in parameter as well
 		//obstacle.GetComponent<Renderer>().sharedMaterial = obstacleMaterial;
 
 		Mesh mesh = meshFilter.mesh;
+		collider.sharedMesh = mesh;
 
 		Vector3[] newVertices;
 		Vector2[] newUV;
