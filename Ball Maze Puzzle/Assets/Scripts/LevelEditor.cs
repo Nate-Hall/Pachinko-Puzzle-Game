@@ -170,6 +170,7 @@ public class LevelEditor : MonoBehaviour {
 		int x = 0;
 		int y = gridValues.GetLength(1) - 1;
 		string line;
+		//string log = "";
 
 		// Read the file and display it line by line.  
 		System.IO.StreamReader file = new System.IO.StreamReader("Assets/Resources/" + filename + ".txt");
@@ -177,15 +178,17 @@ public class LevelEditor : MonoBehaviour {
 			foreach(string str in line.Split(' ')) {
 				if (str != " ") {
 					gridValues[x, y] = int.Parse(str);
+					//log += gridValues[x, y].ToString();
 					x++;
 				}
 			}
+			//log += "\n";
 			x = 0;
 			y--;
 		}
 
 		file.Close();
-
+		//Debug.Log(log);
 		levelEditorGridMaterial.mainTexture = GenerateTexture();
 		GenerateMeshes();
 	}
@@ -195,7 +198,7 @@ public class LevelEditor : MonoBehaviour {
 		tex.filterMode = FilterMode.Point;
 
 		for (int x = 0; x < gridValues.GetLength(0); x++) {
-			for (int y = 0; y < gridValues.GetLength(1); y++) {
+			for (int y = gridValues.GetLength(1) - 1; y >= 0; y--) {
 				tex.SetPixel(x, y, colourDetails[gridValues[x, y]].colour);
 			}
 		}
@@ -207,8 +210,8 @@ public class LevelEditor : MonoBehaviour {
 
 
 	void GenerateMeshes() {
-		for (int y = gridValues.GetLength(1) - 1; y >= 0; y--) {
-			for (int x = 0; x < gridValues.GetLength(0); x++) {
+		for (int x = 0; x < gridValues.GetLength(0); x++) {
+			for (int y = gridValues.GetLength(1) - 1; y >= 0; y--) {
 				if (gridValues[x, y] == OBSTACLE_VALUE) {
 					GenerateObstacle(x, y);
 				}
@@ -218,8 +221,9 @@ public class LevelEditor : MonoBehaviour {
 
 
 
-	void GenerateObstacle(int startX, int startY) {	
+	void GenerateObstacle(int startX, int startY) {
 
+		int[,] obstacleValues = gridValues;
 		Queue<Vector2> obstacleCoords = new Queue<Vector2>();
 		int currentX = startX;
 		int currentTopY = startY;
@@ -228,24 +232,38 @@ public class LevelEditor : MonoBehaviour {
 
 		// First Column check //
 
-		if(CheckPixelInDirectionForObstacle(startX+1, startY-1)) {
+		if(CheckPixelInDirectionForObstacle(obstacleValues, startX + 1, startY+1)) {
 			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, startY, -1, -1));
 		} else {
 			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, startY, -1, 1));
 		}
 
-		while(CheckPixelInDirectionForObstacle(currentX, currentBottomY + 1)) {
-			currentBottomY++;
+		while(CheckPixelInDirectionForObstacle(obstacleValues, currentX, currentBottomY - 1)) {
+			currentBottomY--;
 		}
 		obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, currentBottomY, -1, -1));
 
-		if (CheckPixelInDirectionForObstacle(startX + 1, startY - 1)) {
-			currentTopY--;
+		if (CheckPixelInDirectionForObstacle(obstacleValues, startX + 1, startY + 1)) {
+			currentTopY++;
 		} else {
-			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, startY, 1, 1));
-			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, currentBottomY, 1, -1));
+			if (!CheckPixelInDirectionForObstacle(obstacleValues, startX + 1, currentTopY) && CheckPixelInDirectionForObstacle(obstacleValues, startX + 1, currentTopY - 1)) {
+				obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, startY, 1, -1));
+			} else {
+				obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, startY, 1, 1));
+			}
+
+			if (CheckPixelInDirectionForObstacle(obstacleValues, startX + 1, currentBottomY - 1)) {
+				obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, currentBottomY - 1, 1, -1));
+			} else {
+				obstacleCoords.Enqueue(AddVertexOfPixelToQueue(startX, currentBottomY, 1, -1));
+			}
 			currentVertexSide = 1;
 		}
+
+		for (int i = currentTopY; i >= currentBottomY; i--) {
+			obstacleValues[startX, i] = 0;
+		}
+
 		currentX++;
 
 		// Other Columns //
@@ -253,26 +271,41 @@ public class LevelEditor : MonoBehaviour {
 		bool endOfObstacle = false;
 
 		while(!endOfObstacle) {
-			currentTopY--;
-			currentBottomY++;
 			endOfObstacle = true;
+			int previousTopY = currentTopY;
+			currentTopY = currentBottomY - 1;
 
-			if(currentTopY > currentBottomY) {
-				break;
-			}
-
-			for (int y = currentTopY-2; y < currentBottomY+1; y++) {
-				if(CheckPixelInDirectionForObstacle(currentX, y + 1)) {
-					obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, y+1, currentVertexSide, 1));
-					currentTopY = y + 1;
+			for (int y = currentTopY; y < obstacleValues.GetLength(1) - 1; y++) {
+				if(CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y + 1)) {
+					if (!CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y) && CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y - 1)) {
+						obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, y, currentVertexSide, -1));
+					} else if (previousTopY > y && !CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y+1) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y-1)) {
+						obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, y, currentVertexSide, -1));
+					} else {
+						obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, y, currentVertexSide, 1));
+					}
+					currentTopY = y;
+					previousTopY = currentTopY;
 					endOfObstacle = false;
-					for (y = currentBottomY + 2; y > currentTopY - 1; y--) {
-						if (CheckPixelInDirectionForObstacle(currentX, y - 1)) {
-							obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, y - 1, currentVertexSide, 1));
-							currentBottomY = y - 1;
+					for (y = currentBottomY; y > 0; y--) {
+						if (CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y - 1)) {
+							if (CheckPixelInDirectionForObstacle(obstacleValues, currentX+1, y-1)) {
+								obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, y-1, currentVertexSide, -1));
+								currentBottomY = y-1;
+							} else {
+								obstacleCoords.Enqueue(AddVertexOfPixelToQueue(currentX, y, currentVertexSide, -1));
+								currentBottomY = y;
+							}
+
+							for (int i = currentTopY; i >= currentBottomY; i--) {
+								obstacleValues[currentX, i] = 0;
+							}
+
 							break;
 						}
 					}
+					break;
+				} else if (!CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y+1) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y+2)) {
 					break;
 				}
 			}
@@ -350,9 +383,9 @@ public class LevelEditor : MonoBehaviour {
 
 
 
-	bool CheckPixelInDirectionForObstacle(int currentX, int currentY) {
+	bool CheckPixelInDirectionForObstacle(int[,] obstacleValues, int currentX, int currentY) {
 		if(currentX < gridValues.GetLength(0) - 1 && currentX >= 0 && currentY < gridValues.GetLength(1) - 1 && currentY >= 0) {
-			if(gridValues[currentX, currentY] == OBSTACLE_VALUE) {
+			if(obstacleValues[currentX, currentY] == OBSTACLE_VALUE) {
 				return true;
 			}
 		}
@@ -368,6 +401,8 @@ public class LevelEditor : MonoBehaviour {
 		obj.position = new Vector2(originMin.x + halfPixelSize.x +(halfPixelSize.x * pixelX * 2) + (directionX * halfPixelSize.x), originMin.y + halfPixelSize.y + (halfPixelSize.y * pixelY * 2) + (directionY * halfPixelSize.y));
 		obj.localScale = Vector3.one * 0.01f;
 		obj.GetComponent<Renderer>().material.color = Color.blue;
+		obj.name = "POINT: " + pixelX.ToString() + ", " + pixelY.ToString() + ", " + directionX.ToString() + ", " + directionY.ToString();
+		//Debug.Log("POINT: " + pixelX.ToString() + ", " + pixelY.ToString() + ", " + directionX.ToString() + ", " + directionY.ToString());
 		//EndDebug
 
 		return new Vector2(originMin.x + halfPixelSize.x + (halfPixelSize.x * pixelX * 2) + (directionX * halfPixelSize.x), originMin.y + halfPixelSize.y + (halfPixelSize.y * pixelY * 2) + (directionY * halfPixelSize.y));

@@ -52,7 +52,7 @@ public static class LevelMeshGenerator {
 
 
 	static Vector3[] GenerateVertices(Vector2[] points) {
-		Vector3[] vertices = new Vector3[points.Length]; 
+		Vector3[] vertices = new Vector3[(points.Length * 6) - 4]; 
 
 		int verticesIndex = 0;
 
@@ -64,30 +64,36 @@ public static class LevelMeshGenerator {
 			verticesIndex++;
 		}
 
-		////Back face//
+		//Middle faces//
 
-		//for (int i = 0; i < points.Length; i++) {
-		//	vertices[verticesIndex] = new Vector3(points[i].x, points[i].y, obstacleBackZ);
+		for (int i = 0; i < points.Length - 3; i+=2) {
 
-		//	verticesIndex++;
-		//}
+			vertices[verticesIndex] = new Vector3(points[i].x, points[i].y, obstacleFrontZ);
+			vertices[verticesIndex + 1] = new Vector3(points[i].x, points[i].y, obstacleBackZ);
+			vertices[verticesIndex + 2] = new Vector3(points[i + 2].x, points[i + 2].y, obstacleBackZ);
+			vertices[verticesIndex + 3] = new Vector3(points[i + 2].x, points[i + 2].y, obstacleFrontZ);
+			verticesIndex += 4;
+		}
 
-		////Middle faces//
+		vertices[verticesIndex] = new Vector3(points[points.Length - 2].x, points[points.Length - 2].y, obstacleFrontZ);
+		vertices[verticesIndex + 1] = new Vector3(points[points.Length - 2].x, points[points.Length - 2].y, obstacleBackZ);
+		vertices[verticesIndex + 2] = new Vector3(points[points.Length - 1].x, points[points.Length - 1].y, obstacleBackZ);
+		vertices[verticesIndex + 3] = new Vector3(points[points.Length - 1].x, points[points.Length - 1].y, obstacleFrontZ);
+		verticesIndex += 4;
 
-		//for (int i = 0; i < points.Length - 1; i++) {
+		for (int i = points.Length - 1; i > 2; i -= 2) {
 
-		//	vertices[verticesIndex] = new Vector3(points[i].x, points[i].y, obstacleFrontZ);
-		//	vertices[verticesIndex + 1] = new Vector3(points[i].x, points[i].y, obstacleBackZ);
-		//	vertices[verticesIndex + 2] = new Vector3(points[i + 1].x, points[i + 1].y, obstacleBackZ);
-		//	vertices[verticesIndex + 3] = new Vector3(points[i + 1].x, points[i + 1].y, obstacleFrontZ);
+			vertices[verticesIndex] = new Vector3(points[i].x, points[i].y, obstacleFrontZ);
+			vertices[verticesIndex + 1] = new Vector3(points[i].x, points[i].y, obstacleBackZ);
+			vertices[verticesIndex + 2] = new Vector3(points[i - 2].x, points[i - 2].y, obstacleBackZ);
+			vertices[verticesIndex + 3] = new Vector3(points[i - 2].x, points[i - 2].y, obstacleFrontZ);
+			verticesIndex += 4;
+		}
 
-		//	verticesIndex += 4;
-		//}
-
-		//vertices[verticesIndex] = new Vector3(points[points.Length - 1].x, points[points.Length - 1].y, obstacleFrontZ);
-		//vertices[verticesIndex + 1] = new Vector3(points[points.Length - 1].x, points[points.Length - 1].y, obstacleBackZ);
-		//vertices[verticesIndex + 2] = new Vector3(points[0].x, points[0].y, obstacleBackZ);
-		//vertices[verticesIndex + 3] = new Vector3(points[0].x, points[0].y, obstacleFrontZ);
+		vertices[verticesIndex] = new Vector3(points[1].x, points[1].y, obstacleFrontZ);
+		vertices[verticesIndex + 1] = new Vector3(points[1].x, points[1].y, obstacleBackZ);
+		vertices[verticesIndex + 2] = new Vector3(points[0].x, points[0].y, obstacleBackZ);
+		vertices[verticesIndex + 3] = new Vector3(points[0].x, points[0].y, obstacleFrontZ);
 
 		return vertices;
 	}
@@ -95,7 +101,7 @@ public static class LevelMeshGenerator {
 
 
 	static int[] GenerateTriangles(Vector2[] points) {
-		int[] triangles = new int[((((points.Length - 4) * 3) + 6) )/** 2) + (points.Length * 6)*/];
+		int[] triangles = new int[(((points.Length / 2) - 1) * 6) + (points.Length * 6)];
 
 		int currentVertex = 0;
 
@@ -116,37 +122,23 @@ public static class LevelMeshGenerator {
 			vertexIndex += 6;
 		}
 
-		////Back face//
+		currentVertex += 2;
 
-		//for (int i = 0; i < (((points.Length - 4) * 3) + 6); i += 6) {
-		//	triangles[vertexIndex] = currentVertex;
-		//	triangles[vertexIndex + 1] = currentVertex + 2;
-		//	triangles[vertexIndex + 2] = currentVertex + 3;
+		//Side faces//
 
-		//	triangles[vertexIndex + 3] = currentVertex + 3;
-		//	triangles[vertexIndex + 4] = currentVertex + 1;
-		//	triangles[vertexIndex + 5] = currentVertex;
+		for (int i = 0; i < points.Length; i++) {
+			for (int j = 0; j < 3; j++) {
+				triangles[vertexIndex + j] = currentVertex;
+				currentVertex++;
+			}
+			vertexIndex += 3;
 
-		//	currentVertex += 2;
-		//	vertexIndex += 6;
-		//}
-
-
-		////Side faces//
-
-		//for (int i = 0; i < ((points.Length / 6) * 6); i++) {
-		//	for (int j = 0; j < 3; j++) {
-		//		triangles[vertexIndex + j] = currentVertex;
-		//		currentVertex++;
-		//	}
-		//	vertexIndex += 3;
-
-		//	triangles[vertexIndex] = currentVertex - 1;
-		//	triangles[vertexIndex + 1] = currentVertex;
-		//	triangles[vertexIndex + 2] = currentVertex - 3;
-		//	currentVertex++;
-		//	vertexIndex += 3;
-		//}
+			triangles[vertexIndex] = currentVertex - 1;
+			triangles[vertexIndex + 1] = currentVertex;
+			triangles[vertexIndex + 2] = currentVertex - 3;
+			currentVertex++;
+			vertexIndex += 3;
+		}
 
 		return triangles;
 	}
