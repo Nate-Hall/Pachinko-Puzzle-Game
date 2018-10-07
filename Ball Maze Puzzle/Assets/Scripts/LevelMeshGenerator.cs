@@ -7,9 +7,156 @@ public static class LevelMeshGenerator {
 	const float obstacleFrontZ = -0.1f;
 	const float obstacleBackZ = 0;
 
+	const int OBSTACLE_VALUE = 2;
 
 
-	public static GameObject CreateObstacleObject(Vector2[] obstacleCoords) {
+
+	public static void GenerateMeshes(int[,] gridValues) {
+		for (int x = 0; x < gridValues.GetLength(0); x++) {
+			for (int y = gridValues.GetLength(1) - 1; y >= 0; y--) {
+				if (gridValues[x, y] == OBSTACLE_VALUE) {
+					GenerateObstacle(gridValues, x, y);
+				}
+			}
+		}
+	}
+
+
+
+	static void GenerateObstacle(int[,] gridValues, int startX, int startY) {
+
+		int[,] obstacleValues = gridValues;
+		Queue<Vector2> obstacleCoords = new Queue<Vector2>();
+		int currentX = startX;
+		int currentTopY = startY;
+		int currentBottomY = startY + 1;
+		int currentVertexSide = -1;
+
+		// First Column check //
+
+		if (CheckPixelInDirectionForObstacle(obstacleValues, startX + 1, startY + 1)) {
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, startX, startY, -1, -1));
+		} else {
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, startX, startY, -1, 1));
+		}
+
+		while (currentBottomY > 0) {
+			if (CheckPixelInDirectionForObstacle(obstacleValues, startX, currentBottomY) && !CheckPixelInDirectionForObstacle(obstacleValues, startX, currentBottomY - 1)) {
+				break;
+			} else {
+				currentBottomY--;
+			}
+		}
+		obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, startX, currentBottomY, -1, -1));
+
+		if (!CheckPixelInDirectionForObstacle(obstacleValues, startX + 1, currentTopY) && CheckPixelInDirectionForObstacle(obstacleValues, startX + 1, currentTopY - 1)) {
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, startX, startY, 1, -1));
+		} else {
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, startX, startY, 1, 1));
+		}
+
+		if (CheckPixelInDirectionForObstacle(obstacleValues, startX + 1, currentBottomY - 1)) {
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, startX, currentBottomY - 1, 1, -1));
+		} else {
+			obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, startX, currentBottomY, 1, -1));
+		}
+		currentVertexSide = 1;
+
+		for (int i = currentTopY; i >= currentBottomY; i--) {
+			obstacleValues[startX, i] = 0;
+		}
+
+		currentX++;
+
+		// Other Columns //
+
+		bool endOfObstacle = false;
+
+		while (!endOfObstacle) {
+			endOfObstacle = true;
+			int previousTopY = currentTopY;
+			currentTopY = currentBottomY - 1;
+
+			for (int y = currentTopY; y < obstacleValues.GetLength(1) - 1; y++) {
+				if (CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y + 1)) {
+					if (!CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y) && CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y - 1)) {
+						obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, currentX, y, currentVertexSide, -1));
+					} else if (previousTopY > y && !CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y + 1) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y - 1)) {
+						obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, currentX, y, currentVertexSide, -1));
+					} else {
+						obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, currentX, y, currentVertexSide, 1));
+					}
+					currentTopY = y;
+					previousTopY = currentTopY;
+					currentBottomY = currentTopY;
+					endOfObstacle = false;
+					for (y = currentBottomY; y > 0; y--) {
+						if (CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y - 1)) {
+							if (CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y - 1)) {
+								obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, currentX, y - 1, currentVertexSide, -1));
+								currentBottomY = y - 1;
+							} else {
+								obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, currentX, y, currentVertexSide, -1));
+								currentBottomY = y;
+							}
+
+							for (int i = currentTopY; i >= currentBottomY; i--) {
+								obstacleValues[currentX, i] = 0;
+							}
+
+							break;
+						}
+					}
+					break;
+				} else if (!CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y + 1) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y + 2)) {
+					break;
+				}
+			}
+
+			currentX++;
+		}
+
+		Vector2[] obstaclePoints = obstacleCoords.ToArray();
+		LevelMeshGenerator.CreateObstacleObject(obstaclePoints);
+	}
+
+
+
+	static bool CheckPixelInDirectionForObstacle(int[,] gridValues, int currentX, int currentY) {
+		if (currentX < gridValues.GetLength(0) - 1 && currentX >= 0 && currentY < gridValues.GetLength(1) - 1 && currentY >= 0) {
+			if (gridValues[currentX, currentY] == OBSTACLE_VALUE) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+
+
+
+	static Vector2 AddVertexOfPixelToQueue(int[,] gridValues, int pixelX, int pixelY, int directionX, int directionY) {
+		Vector2 originMin = new Vector2(-0.5f, -0.5f);
+		Vector2 originMax = new Vector2(0.5f, 0.5f);
+		Vector2 originSize = new Vector2(1, 1);
+		Vector2 halfPixelSize = new Vector2(0.5f / ((gridValues.GetLength(0) - 4) / 3), 0.5f / ((gridValues.GetLength(1) - 4) / 3));
+
+		pixelX--;
+		pixelY--;
+		while(pixelX > (gridValues.GetLength(0) - 4) / 3) {
+			pixelX -= (gridValues.GetLength(0) - 4) / 3;
+			pixelX--;
+		}
+		while (pixelY > (gridValues.GetLength(1) - 4) / 3) {
+			pixelY -= (gridValues.GetLength(1) - 4) / 3;
+			pixelY--;
+		}
+
+		return new Vector2(originMin.x + halfPixelSize.x + (halfPixelSize.x * pixelX * 2) + (directionX * halfPixelSize.x), originMin.y + halfPixelSize.y + (halfPixelSize.y * pixelY * 2) + (directionY * halfPixelSize.y));
+	}
+
+
+	static GameObject CreateObstacleObject(Vector2[] obstacleCoords) {
 		GameObject obstacle = new GameObject("Obstacle");
 		MeshFilter meshFilter = obstacle.AddComponent<MeshFilter>();
 		obstacle.AddComponent<MeshRenderer>();
@@ -36,7 +183,8 @@ public static class LevelMeshGenerator {
 				new Vector2(1, -1),
 				new Vector2(-1, -1)
 		};*/
-		MorphObstacleToConvexShape(obstacleCoords);
+
+		//MorphObstacleToConvexShape(obstacleCoords);
 		newVertices = GenerateVertices(obstacleCoords);
 		newTriangles = GenerateTriangles(obstacleCoords);
 		newUV = GenerateUVs(obstacleCoords);
