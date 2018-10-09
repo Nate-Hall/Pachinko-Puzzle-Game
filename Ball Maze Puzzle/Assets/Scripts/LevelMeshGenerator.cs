@@ -11,19 +11,24 @@ public static class LevelMeshGenerator {
 
 
 
-	public static void GenerateMeshes(int[,] gridValues) {
+	public static List<Transform> GenerateMeshes(int[,] gridValues) {
+		List<Transform> obstacles = new List<Transform>();
+
 		for (int x = 0; x < gridValues.GetLength(0); x++) {
 			for (int y = gridValues.GetLength(1) - 1; y >= 0; y--) {
 				if (gridValues[x, y] == OBSTACLE_VALUE) {
-					GenerateObstacle(gridValues, x, y);
+					Vector2[] obstaclePoints = GenerateObstaclePoints(gridValues, x, y);
+					obstacles.Add(CreateObstacleObject(obstaclePoints));
 				}
 			}
 		}
+
+		return obstacles;
 	}
 
 
 
-	static void GenerateObstacle(int[,] gridValues, int startX, int startY) {
+	static Vector2[] GenerateObstaclePoints(int[,] gridValues, int startX, int startY) {
 
 		int[,] obstacleValues = gridValues;
 		Queue<Vector2> obstacleCoords = new Queue<Vector2>();
@@ -116,8 +121,7 @@ public static class LevelMeshGenerator {
 			currentX++;
 		}
 
-		Vector2[] obstaclePoints = obstacleCoords.ToArray();
-		LevelMeshGenerator.CreateObstacleObject(obstaclePoints);
+		return obstacleCoords.ToArray();
 	}
 
 
@@ -139,24 +143,13 @@ public static class LevelMeshGenerator {
 		Vector2 originMin = new Vector2(-0.5f, -0.5f);
 		Vector2 originMax = new Vector2(0.5f, 0.5f);
 		Vector2 originSize = new Vector2(1, 1);
-		Vector2 halfPixelSize = new Vector2(0.5f / ((gridValues.GetLength(0) - 4) / 3), 0.5f / ((gridValues.GetLength(1) - 4) / 3));
-
-		pixelX--;
-		pixelY--;
-		while(pixelX > (gridValues.GetLength(0) - 4) / 3) {
-			pixelX -= (gridValues.GetLength(0) - 4) / 3;
-			pixelX--;
-		}
-		while (pixelY > (gridValues.GetLength(1) - 4) / 3) {
-			pixelY -= (gridValues.GetLength(1) - 4) / 3;
-			pixelY--;
-		}
+		Vector2 halfPixelSize = new Vector2(0.5f / (float)gridValues.GetLength(0), 0.5f / (float)gridValues.GetLength(1));
 
 		return new Vector2(originMin.x + halfPixelSize.x + (halfPixelSize.x * pixelX * 2) + (directionX * halfPixelSize.x), originMin.y + halfPixelSize.y + (halfPixelSize.y * pixelY * 2) + (directionY * halfPixelSize.y));
 	}
 
 
-	static GameObject CreateObstacleObject(Vector2[] obstacleCoords) {
+	static Transform CreateObstacleObject(Vector2[] obstacleCoords) {
 		GameObject obstacle = new GameObject("Obstacle");
 		MeshFilter meshFilter = obstacle.AddComponent<MeshFilter>();
 		obstacle.AddComponent<MeshRenderer>();
@@ -196,7 +189,7 @@ public static class LevelMeshGenerator {
 		//mesh.uv = newUV;
 		mesh.RecalculateNormals();
 
-		return obstacle;
+		return obstacle.transform;
 	}
 
 

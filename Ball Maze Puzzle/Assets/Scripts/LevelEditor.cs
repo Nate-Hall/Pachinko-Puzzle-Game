@@ -8,7 +8,11 @@ public class LevelEditor : MonoBehaviour {
 
 	Transform levelEditorCanvas;
 
+	public Transform obstacleParent;
+
 	public Material levelEditorGridMaterial;
+
+	List<Transform> obstacles;
 
 	const int OBSTACLE_VALUE = 2;
 
@@ -47,7 +51,9 @@ public class LevelEditor : MonoBehaviour {
 		colourDetails[3].name = "Ball";
 		colourDetails[4].name = "Goal";
 
-		
+		obstacles = new List<Transform>();
+
+
 		//debug
 		//LevelMeshGenerator.CreateObstacleObject();
 		//Vector3 a = new Vector3(0, 1, 0);
@@ -183,7 +189,25 @@ public class LevelEditor : MonoBehaviour {
 		file.Close();
 		//Debug.Log(log);
 		levelEditorGridMaterial.mainTexture = GenerateTexture();
-		LevelMeshGenerator.GenerateMeshes(gridValues);
+
+		int[,] cellValues = new int[divisions, divisions];
+		for (int row = 0; row < gridRows; row++) {
+			for (int column = 0; column < gridColumns; column++) {
+				for (int i = 0; i < divisions; i++) {
+					for (int j = 0; j < divisions; j++) {
+						cellValues[j, i] = gridValues[1 + row + (row * divisions) + j, (1 + column + (column * divisions) + i)];
+					}
+				}
+				obstacles = LevelMeshGenerator.GenerateMeshes(cellValues);
+				Transform grid = new GameObject().transform;
+				grid.name = "Cell: " + row.ToString() + ", " + column.ToString();
+				grid.parent = obstacleParent;
+				foreach(Transform obj in obstacles) {
+					obj.localScale = new Vector3(0.1f, 0.1f, 1);
+					obj.parent = grid;
+				}
+			}
+		}
 	}
 
 	Texture2D GenerateTexture() {
