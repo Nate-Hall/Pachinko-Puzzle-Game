@@ -147,6 +147,16 @@ public class LevelEditor : MonoBehaviour {
 		// convert array to text and save
 		if (filename != "") {
 			List<string> linesToWrite = new List<string>();
+
+			/*
+			 * 
+			 * 
+			 * TODO: ADD FIRST LINE WITH R C D W
+			 * 
+			 * 
+			 */
+			linesToWrite.Add("r3 c3 d9 w0");
+
 			for (int x = 0; x < gridValues.GetLength(0); x++) {
 				StringBuilder line = new StringBuilder();
 				for (int y = 0; y < gridValues.GetLength(1); y++) {

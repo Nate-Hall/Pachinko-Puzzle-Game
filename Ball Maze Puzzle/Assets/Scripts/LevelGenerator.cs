@@ -5,16 +5,17 @@ using UnityEngine;
 public class LevelGenerator : MonoBehaviour {
 
 	public Transform backboard;
-	public Transform tileBack;
+	public Transform cellPrefab;
 
-	public string levelCode;
+	public string levelCode = "123";
 
 	public Transform gridParent;
+
+	public Transform[,] cellTransforms;
 
 
 
 	private void Start() {
-		levelCode = "123";
 		GenerateLevelObjects(LoadLevelFromFile(levelCode));
 	}
 
@@ -74,7 +75,10 @@ public class LevelGenerator : MonoBehaviour {
 
 
 	void GenerateLevelObjects(LevelDetails level) {
+		Instantiate(backboard, gridParent);
+
 		int[,] cellValues = new int[level.divisions, level.divisions];
+		cellTransforms = new Transform[level.rows, level.columns];
 
 		for (int row = 0; row < level.rows; row++) {
 			for (int column = 0; column < level.columns; column++) {
@@ -84,14 +88,17 @@ public class LevelGenerator : MonoBehaviour {
 					}
 				}
 				List<Transform> obstacles = LevelMeshGenerator.GenerateMeshes(cellValues);
-				Transform grid = new GameObject().transform;
+				Transform grid = (Transform)Instantiate(cellPrefab, gridParent);
+				cellTransforms[row, column] = grid;
 				grid.name = "Cell: " + row.ToString() + ", " + column.ToString();
 				grid.parent = gridParent;
 				grid.position = new Vector3(((level.rows - 1) * -0.5f) + row, ((level.columns - 1) * -0.5f) + column, 0);
+				grid.GetComponent<CellBehaviour>().setPosition = grid.localPosition;
 				foreach (Transform obj in obstacles) {
 					obj.parent = grid;
 					obj.localPosition = Vector3.zero;
 				}
+				grid.localScale = Vector3.one * ((float)level.divisions / ((float)level.divisions + 1f));
 			}
 		}
 	}

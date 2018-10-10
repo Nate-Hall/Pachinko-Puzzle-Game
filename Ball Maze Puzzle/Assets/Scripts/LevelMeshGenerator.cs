@@ -82,8 +82,8 @@ public static class LevelMeshGenerator {
 			int previousTopY = currentTopY;
 			currentTopY = currentBottomY - 1;
 
-			for (int y = currentTopY; y < obstacleValues.GetLength(1) - 1; y++) {
-				if (CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y + 1)) {
+			for (int y = currentTopY; y < obstacleValues.GetLength(1); y++) {
+				if (CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && (y == obstacleValues.GetLength(1) - 1 || !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y + 1))) {
 					if (!CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y) && CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y - 1)) {
 						obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, currentX, y, currentVertexSide, -1));
 					} else if (previousTopY > y && !CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y + 1) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y - 1)) {
@@ -95,8 +95,8 @@ public static class LevelMeshGenerator {
 					previousTopY = currentTopY;
 					currentBottomY = currentTopY;
 					endOfObstacle = false;
-					for (y = currentBottomY; y > 0; y--) {
-						if (CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y - 1)) {
+					for (y = currentBottomY; y >= 0; y--) {
+						if (CheckPixelInDirectionForObstacle(obstacleValues, currentX, y) && (y == 0 || !CheckPixelInDirectionForObstacle(obstacleValues, currentX, y - 1))) {
 							if (CheckPixelInDirectionForObstacle(obstacleValues, currentX + 1, y - 1)) {
 								obstacleCoords.Enqueue(AddVertexOfPixelToQueue(obstacleValues, currentX, y - 1, currentVertexSide, -1));
 								currentBottomY = y - 1;
@@ -127,15 +127,13 @@ public static class LevelMeshGenerator {
 
 
 	static bool CheckPixelInDirectionForObstacle(int[,] gridValues, int currentX, int currentY) {
-		if (currentX < gridValues.GetLength(0) - 1 && currentX >= 0 && currentY < gridValues.GetLength(1) - 1 && currentY >= 0) {
+		if (currentX < gridValues.GetLength(0) && currentX >= 0 && currentY < gridValues.GetLength(1) && currentY >= 0) {
 			if (gridValues[currentX, currentY] == OBSTACLE_VALUE) {
 				return true;
 			}
 		}
-
 		return false;
 	}
-
 
 
 
