@@ -5,8 +5,12 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour {
 
-	private int selectedTileX, selectedTileY;
-	private Vector3 selectedTileStartPos;
+	Transform selectedTile;
+	Vector3 selectedTileStartPos;
+
+	Transform hoverTile;
+	Vector3 hoverTileStartPos;
+
 	public GUIStyle style;
 
 
@@ -27,11 +31,37 @@ public class GameManager : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if(Input.GetMouseButtonUp(0)) {
+		if(Input.GetMouseButtonDown(0)) {
+			selectedTile = SelectTile();
+			if (selectedTile != null) {
+				selectedTileStartPos = selectedTile.GetComponent<CellBehaviour>().setPosition;
+				selectedTile.GetComponent<CellBehaviour>().GrabCell();
+			}
+		}
+
+		if(selectedTile != null && !Input.GetMouseButton(0)) {
 			Transform obj = SelectTile();
 			if (obj != null) {
-				obj.GetComponent<CellBehaviour>().GrabCell();
+				selectedTile.GetComponent<CellBehaviour>().setPosition = hoverTileStartPos;
+				hoverTile.GetComponent<CellBehaviour>().UndoPreviewSwap();
+				hoverTile.GetComponent<CellBehaviour>().SetSwap();
 			}
+			selectedTile.GetComponent<CellBehaviour>().ReleaseCell();
+			selectedTile = null;
+		} else if (selectedTile != null && Input.GetMouseButton(0)) {
+			Transform obj = SelectTile();
+			if(obj != null) {
+				hoverTile = obj;
+				hoverTileStartPos = hoverTile.GetComponent<CellBehaviour>().setPosition;
+				hoverTile.GetComponent<CellBehaviour>().PreviewSwap(selectedTileStartPos);
+			} else if (hoverTile != null) {
+				Vector3 pos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 3f));
+				if(pos.x < hoverTileStartPos.x - 0.5f || pos.x > hoverTileStartPos.x + 0.5f || pos.y < hoverTileStartPos.y - 0.5f || pos.y > hoverTileStartPos.y + 0.5f) {
+					hoverTile.GetComponent<CellBehaviour>().UndoPreviewSwap();
+					hoverTile = null;
+				}
+			}
+
 		}
 	}
 
@@ -39,7 +69,7 @@ public class GameManager : MonoBehaviour {
 
 	private Transform SelectTile() {
 		RaycastHit hit = new RaycastHit();
-		if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, float.MaxValue, 1 << 8)) {
+		if (Physics.Raycast(Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 2.9f)), Vector3.forward, out hit, 1f, 1 << 8)) {
 			return hit.transform;
 		}
 		return null;
