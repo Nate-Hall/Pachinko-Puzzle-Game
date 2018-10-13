@@ -49,7 +49,7 @@ public class GameManager : MonoBehaviour {
 			selectedTile = null;
 		} else if (selectedTile != null && Input.GetMouseButton(0)) {
 			Transform obj = SelectTile();
-			if(hoverTile == null && obj != null) {
+			if(hoverTile == null && obj != null && obj != selectedTile) {
 				hoverTile = obj;
 				hoverTileStartPos = hoverTile.GetComponent<CellBehaviour>().setPosition;
 				hoverTile.GetComponent<CellBehaviour>().PreviewSwap(selectedTileStartPos);

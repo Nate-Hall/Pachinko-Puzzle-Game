@@ -6,10 +6,14 @@ public class BallScript : MonoBehaviour {
 
 	private bool active = false;
 	private Vector3 startPos;
+	float originalSize = 0.1f;
+	public float shrinkSpeed = 1;
+	SphereCollider col;
 
 	// Use this for initialization
 	void Start () {
 		startPos = transform.position;
+		col = GetComponent<SphereCollider>();
 	}
 
 
@@ -18,8 +22,10 @@ public class BallScript : MonoBehaviour {
 		if(!active) {
 			GetComponent<Rigidbody>().useGravity = false;
 			GetComponent<Rigidbody>().velocity = Vector3.zero;
+			col.enabled = false;
 		} else {
 			GetComponent<Rigidbody>().useGravity = true;
+			col.enabled = true;
 		}
 
 		if(Input.GetKeyDown(KeyCode.Space)) {
@@ -37,9 +43,14 @@ public class BallScript : MonoBehaviour {
 
 
 
-	private void OnTriggerEnter(Collider other) {
+	private void OnTriggerStay(Collider other) {
 		if(other.tag == "Goal") {
-			ResetBall();
+			if(transform.localScale.x > 0) {
+				transform.localScale -= Vector3.one * shrinkSpeed * Time.deltaTime;
+			}
+			if (transform.localScale.x <= 0.005f) {
+				ResetBall();
+			}
 		}
 	}
 
@@ -49,5 +60,6 @@ public class BallScript : MonoBehaviour {
 		active = false;
 		GetComponent<Rigidbody>().velocity = Vector3.zero;
 		transform.position = startPos;
+		transform.localScale = Vector3.one * originalSize;
 	}
 }

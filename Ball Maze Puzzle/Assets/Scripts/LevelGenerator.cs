@@ -18,16 +18,19 @@ public class LevelGenerator : MonoBehaviour {
 
 	public Transform[,] cellTransforms;
 
+	LevelDetails level;
+
 
 
 	private void Start() {
 		GenerateLevelObjects(LoadLevelFromFile(levelCode));
+		level = new LevelDetails();
 	}
 
 
 
 	public LevelDetails LoadLevelFromFile(string filename) {
-		LevelDetails level = new LevelDetails();
+		level = new LevelDetails();
 		level.chapter = int.Parse(filename.Substring(0, 1));
 		level.levelNumber = int.Parse(filename.Substring(1, 2));
 
@@ -88,14 +91,19 @@ public class LevelGenerator : MonoBehaviour {
 		for (int row = 0; row < level.rows; row++) {
 			for (int column = 0; column < level.columns; column++) {
 				Transform grid = (Transform)Instantiate(cellPrefab, gridParent);
+				cellTransforms[row, column] = grid;
+				grid.name = "Cell: " + row.ToString() + ", " + column.ToString();
+				grid.parent = gridParent;
+				grid.position = new Vector3(((level.rows - 1) * -0.5f) + row, ((level.columns - 1) * -0.5f) + column, 0);
+				grid.GetComponent<CellBehaviour>().setPosition = grid.localPosition;
 				bool isLocked = false;
 				for (int i = 0; i < level.divisions; i++) {
 					for (int j = 0; j < level.divisions; j++) {
 						cellValues[j, i] = level.gridValues[1 + row + (row * level.divisions) + j, (1 + column + (column * level.divisions) + i)];
 
 						if(cellValues[j, i] == BALL_VALUE) {
-							Transform ball = (Transform)Instantiate(ballPrefab, grid);
-							ball.localPosition = new Vector3(-0.5f + (0.5f / (float)level.divisions) + ((1 / (float)level.divisions) * i), -0.5f + (0.5f / (float)level.divisions) + ((1 / (float)level.divisions) * j), -0.1f);
+							Transform ball = (Transform)Instantiate(ballPrefab, gridParent);
+							ball.localPosition = new Vector3(grid.localPosition.x + -0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * (level.divisions - i)), grid.localPosition.y + -0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * (level.divisions - j)), -0.1f);
 						} else if(cellValues[j, i] == GOAL_VALUE) {
 							Transform goal = (Transform)Instantiate(goalPrefab, grid);
 							goal.localPosition = new Vector3(-0.5f + (0.5f / (float)level.divisions) + ((1 / (float)level.divisions) * i), -0.5f + (0.5f / (float)level.divisions) + ((1 / (float)level.divisions) * j), -0.1f);
@@ -104,11 +112,6 @@ public class LevelGenerator : MonoBehaviour {
 					}
 				}
 				List<Transform> obstacles = LevelMeshGenerator.GenerateMeshes(cellValues);
-				cellTransforms[row, column] = grid;
-				grid.name = "Cell: " + row.ToString() + ", " + column.ToString();
-				grid.parent = gridParent;
-				grid.position = new Vector3(((level.rows - 1) * -0.5f) + row, ((level.columns - 1) * -0.5f) + column, 0);
-				grid.GetComponent<CellBehaviour>().setPosition = grid.localPosition;
 				if(isLocked) {
 					grid.GetComponent<CellBehaviour>().locked = isLocked;
 				}
@@ -117,6 +120,30 @@ public class LevelGenerator : MonoBehaviour {
 					obj.localPosition = Vector3.zero;
 				}
 				grid.localScale = Vector3.one * ((float)level.divisions / ((float)level.divisions + 1f));
+			}
+		}
+
+		ShuffleTiles(cellTransforms);
+	}
+
+
+
+	void ShuffleTiles(Transform[,] cells) {
+		for (int row = 0; row < level.rows; row++) {
+			for (int column = 0; column < level.columns; column++) {
+				if(!cells[row, column].GetComponent<CellBehaviour>().locked) {
+					Vector3 temp = cells[row, column].localPosition;
+					int ranX = Random.Range(0, level.rows);
+					int ranY = Random.Range(0, level.columns);
+					while(cells[ranX, ranY].GetComponent<CellBehaviour>().locked || (ranX == row && ranY == column)) {
+						ranX = Random.Range(0, level.rows);
+						ranY = Random.Range(0, level.columns);
+					}
+					cells[row, column].GetComponent<CellBehaviour>().setPosition = cells[ranX, ranY].localPosition;
+					cells[ranX, ranY].GetComponent<CellBehaviour>().setPosition = temp;
+					cells[row, column].localPosition = cells[ranX, ranY].localPosition;
+					cells[ranX, ranY].localPosition = temp;
+				}
 			}
 		}
 	}
