@@ -31,6 +31,10 @@ public class CellBehaviour : MonoBehaviour {
 
 
 	private void Update() {
+		if(locked && col.enabled) {
+			col.enabled = false;
+		}
+
 		if (transform.localPosition != setPosition && !selected && !previewSwap) {
 			MoveTowardsPosition(setPosition);
 		}
@@ -95,7 +99,6 @@ public class CellBehaviour : MonoBehaviour {
 	public void UndoPreviewSwap() {
 		previewSwap = false;
 		previewSwapPosition = setPosition;
-		//col.center = Vector3.zero;
 	}
 
 
@@ -103,9 +106,6 @@ public class CellBehaviour : MonoBehaviour {
 	void UpdatePreviewSwapPosition() {
 		if(previewSwap && transform.localPosition != previewSwapPosition) {
 			MoveTowardsPosition(previewSwapPosition);
-			//col.center = setPosition - transform.localPosition;
-		} else {
-			UndoPreviewSwap();
 		}
 	}
 }

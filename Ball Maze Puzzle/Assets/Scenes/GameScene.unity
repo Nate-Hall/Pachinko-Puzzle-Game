@@ -286,6 +286,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   backboard: {fileID: 4442961568948380, guid: d90fcde03e1cd57489697aefb1d38537, type: 2}
   cellPrefab: {fileID: 4613807983928602, guid: 774229bd604c5e24e8f417e5fce796ef, type: 2}
+  ballPrefab: {fileID: 4598078494315916, guid: 30020433cd5581a4da3e836796a96a0f, type: 2}
+  goalPrefab: {fileID: 4134842967918266, guid: de67ae539d3120348a808636d64bfb1a, type: 2}
   levelCode: 123
   gridParent: {fileID: 2068127029}
 --- !u!114 &2021947496

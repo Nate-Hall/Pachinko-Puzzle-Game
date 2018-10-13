@@ -183,6 +183,7 @@ public class LevelEditor : MonoBehaviour {
 
 		// Read the file and display it line by line.  
 		System.IO.StreamReader file = new System.IO.StreamReader("Assets/Resources/" + filename + ".txt");
+		file.ReadLine();
 		while ((line = file.ReadLine()) != null) {
 			foreach(string str in line.Split(' ')) {
 				if (str != " ") {

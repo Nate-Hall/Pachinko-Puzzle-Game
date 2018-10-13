@@ -40,17 +40,16 @@ public class GameManager : MonoBehaviour {
 		}
 
 		if(selectedTile != null && !Input.GetMouseButton(0)) {
-			Transform obj = SelectTile();
-			if (obj != null) {
+			if (hoverTile != null) {
 				selectedTile.GetComponent<CellBehaviour>().setPosition = hoverTileStartPos;
-				hoverTile.GetComponent<CellBehaviour>().UndoPreviewSwap();
 				hoverTile.GetComponent<CellBehaviour>().SetSwap();
 			}
+
 			selectedTile.GetComponent<CellBehaviour>().ReleaseCell();
 			selectedTile = null;
 		} else if (selectedTile != null && Input.GetMouseButton(0)) {
 			Transform obj = SelectTile();
-			if(obj != null) {
+			if(hoverTile == null && obj != null) {
 				hoverTile = obj;
 				hoverTileStartPos = hoverTile.GetComponent<CellBehaviour>().setPosition;
 				hoverTile.GetComponent<CellBehaviour>().PreviewSwap(selectedTileStartPos);
@@ -61,7 +60,6 @@ public class GameManager : MonoBehaviour {
 					hoverTile = null;
 				}
 			}
-
 		}
 	}
 

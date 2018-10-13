@@ -2064,11 +2064,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 580759269}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &582486830 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4414996318142430, guid: d430a74281a87d24caa24278e8a8c6a3,
-    type: 2}
-  m_PrefabInternal: {fileID: 1943931887}
 --- !u!1 &605676250
 GameObject:
   m_ObjectHideFlags: 0
@@ -10973,8 +10968,6 @@ MonoBehaviour:
     m_FixedHeight: 0
     m_StretchWidth: 1
     m_StretchHeight: 0
-  selectParticle: {fileID: 582486830}
-  frontPanel: {fileID: 752288157}
 --- !u!4 &2044593665
 Transform:
   m_ObjectHideFlags: 0
