@@ -23,8 +23,34 @@ public class LevelGenerator : MonoBehaviour {
 
 
 	private void Start() {
-		GenerateLevelObjects(LoadLevelFromFile(levelCode));
+		GenerateLevel();
+	}
+
+
+
+	public void GenerateLevel() {
+		GenerateLevelObjects(LoadLevelFromFile(levelCode), true);
 		level = new LevelDetails();
+	}
+
+
+
+	public int FindNextLevel() {
+		int currentLevel = int.Parse(levelCode);
+		currentLevel++;
+		if (!System.IO.File.Exists("Assets/Resources/" + currentLevel.ToString() + ".txt")) {
+			currentLevel = (int.Parse(levelCode.Substring(0, 1)) * 100) + 1;
+			if (!System.IO.File.Exists("Assets/Resources/" + currentLevel.ToString() + ".txt")) {
+				currentLevel = -1;
+			}
+		}
+		return currentLevel;
+	}
+
+
+
+	public void SetLevel(int levelNumber) {
+		levelCode = levelNumber.ToString();
 	}
 
 
@@ -82,7 +108,7 @@ public class LevelGenerator : MonoBehaviour {
 
 
 
-	void GenerateLevelObjects(LevelDetails level) {
+	void GenerateLevelObjects(LevelDetails level, bool shuffle) {
 		Instantiate(backboard, gridParent);
 
 		int[,] cellValues = new int[level.divisions, level.divisions];
@@ -123,7 +149,9 @@ public class LevelGenerator : MonoBehaviour {
 			}
 		}
 
-		ShuffleTiles(cellTransforms);
+		if (shuffle) {
+			ShuffleTiles(cellTransforms);
+		}
 	}
 
 

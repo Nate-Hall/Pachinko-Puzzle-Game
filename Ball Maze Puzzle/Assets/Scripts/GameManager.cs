@@ -13,12 +13,16 @@ public class GameManager : MonoBehaviour {
 
 	public GUIStyle style;
 
+	LevelGenerator levelGen;
 
 
 
-	private void Start() {
+
+	private void Awake() {
 		style.fontSize = 30;
 		style.normal.textColor = Color.white;
+
+		levelGen = transform.GetComponent<LevelGenerator>();
 	}
 
 
@@ -71,5 +75,25 @@ public class GameManager : MonoBehaviour {
 			return hit.transform;
 		}
 		return null;
+	}
+
+
+
+	public bool CanLoadNextLevel() {
+		int nextLevel = levelGen.FindNextLevel();
+		if(nextLevel != -1 && nextLevel % 100 != 1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+
+
+	public void LoadNextLevel() {
+		if (CanLoadNextLevel()) {
+			levelGen.SetLevel(levelGen.FindNextLevel());
+			levelGen.GenerateLevel();
+		}
 	}
 }
