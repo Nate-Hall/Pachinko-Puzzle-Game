@@ -45,8 +45,8 @@ public class PostPuzzleMenuScript : MonoBehaviour {
 
 
 	public void OnMenuButtonClick() {
-		//TODO faded transition to main menu
-		SceneManager.LoadScene("MainMenu");
+		Deactivate();
+		StartCoroutine("FadeToMainMenu");
 	}
 
 
@@ -69,5 +69,12 @@ public class PostPuzzleMenuScript : MonoBehaviour {
 		Deactivate();
 		manager.SetInteractive(true);
 	}
-	
+
+
+
+	IEnumerator FadeToMainMenu() {
+		GameObject.FindGameObjectWithTag("ScreenFade").GetComponent<Animator>().SetTrigger("Darken");
+		yield return new WaitForSeconds(1);
+		SceneManager.LoadScene("MainMenu");
+	}
 }
