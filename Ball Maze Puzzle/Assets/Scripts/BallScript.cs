@@ -29,10 +29,10 @@ public class BallScript : MonoBehaviour {
 		}
 
 		if(Input.GetKeyDown(KeyCode.Space)) {
+			GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().SetInteractive(false);
 			active = !active;
 			if(!active) {
 				ResetBall();
-				Debug.Log("ResetBall");
 			}
 		}
 
@@ -49,7 +49,7 @@ public class BallScript : MonoBehaviour {
 				transform.localScale -= Vector3.one * shrinkSpeed * Time.deltaTime;
 			}
 			if (transform.localScale.x <= 0.005f) {
-				ResetBall();
+				GameObject.FindGameObjectWithTag("PostPuzzleMenu").GetComponent<PostPuzzleMenuScript>().Activate();
 			}
 		}
 	}
@@ -61,5 +61,6 @@ public class BallScript : MonoBehaviour {
 		GetComponent<Rigidbody>().velocity = Vector3.zero;
 		transform.position = startPos;
 		transform.localScale = Vector3.one * originalSize;
+		GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>().SetInteractive(true);
 	}
 }

@@ -10,6 +10,7 @@ TagManager:
   - GameManager
   - SelectRing
   - Front
+  - PostPuzzleMenu
   layers:
   - Default
   - TransparentFX

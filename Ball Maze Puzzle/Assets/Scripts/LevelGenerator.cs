@@ -29,8 +29,19 @@ public class LevelGenerator : MonoBehaviour {
 
 
 	public void GenerateLevel() {
+		RemoveLevel();
 		GenerateLevelObjects(LoadLevelFromFile(levelCode), true);
 		level = new LevelDetails();
+	}
+
+
+
+	public void RemoveLevel() {
+		foreach (Transform obj in gridParent.GetComponentsInChildren<Transform>()) {
+			if (obj != gridParent) {
+				Destroy(obj.gameObject);
+			}
+		}
 	}
 
 
