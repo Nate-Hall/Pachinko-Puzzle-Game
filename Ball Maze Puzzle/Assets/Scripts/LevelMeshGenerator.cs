@@ -163,19 +163,6 @@ public static class LevelMeshGenerator {
 		Vector2[] newUV;
 		int[] newTriangles;
 
-		//Vertices//
-
-		//debug
-		/*obstacleCoords = new Vector2[] {
-				new Vector2(-1, 1),
-				new Vector2(-0.7f, 1),
-				new Vector2(0.7f, -0.7f),
-				new Vector2(1, -0.7f),
-				new Vector2(1, -1),
-				new Vector2(-1, -1)
-		};*/
-
-		//MorphObstacleToConvexShape(obstacleCoords);
 		newVertices = GenerateVertices(obstacleCoords);
 		newTriangles = GenerateTriangles(obstacleCoords);
 		newUV = GenerateUVs(obstacleCoords);
@@ -184,7 +171,7 @@ public static class LevelMeshGenerator {
 
 		mesh.vertices = newVertices;
 		mesh.triangles = newTriangles;
-		//mesh.uv = newUV;
+		mesh.uv = newUV;
 		mesh.RecalculateNormals();
 
 		return obstacle.transform;
@@ -318,11 +305,76 @@ public static class LevelMeshGenerator {
 
 
 	static Vector2[] GenerateUVs(Vector2[] points) {
-		Vector2[] uvs = new Vector2[points.Length * 6];
+		Vector2[] uvs = new Vector2[(points.Length * 6) - 4];
 
-		/*
-		 * Add UV generation code 
-		 */
+		int verticesIndex = 0;
+
+		float minX = points[0].x;
+		float maxX = points[0].x;
+		float minY = points[0].y;
+		float maxY = points[0].y;
+
+		for (int i = 0; i < points.Length; i++) {
+			if(points[i].x < minX) {
+				minX = points[i].x;
+			} else if (points[i].x > maxX) {
+				maxX = points[i].x;
+			}
+
+			if (points[i].y < minY) {
+				minY = points[i].y;
+			} else if (points[i].y > maxY) {
+				maxY = points[i].y;
+			}
+		}
+
+		float objWidth = maxX - minX;
+		float objHeight = maxY - minY;
+
+		float zDistance = obstacleFrontZ - obstacleBackZ;
+
+		//Front face//
+
+		for (int i = 0; i < points.Length; i++) {
+			if (objWidth * 2 >= objHeight) {
+				uvs[verticesIndex] = new Vector2((points[i].x - minX) / objWidth, (points[i].y - minY));
+			} else {
+				uvs[verticesIndex] = new Vector2((points[i].y - minY) / objHeight, (points[i].x - minX));
+			}
+
+			verticesIndex++;
+		}
+
+		//Middle faces//
+
+		for (int i = 0; i < points.Length - 3; i += 2) {
+
+			uvs[verticesIndex] = new Vector2((points[i].x - minX)/objWidth, 0);
+			uvs[verticesIndex + 1] = new Vector2((points[i].x - minX) / objWidth, zDistance);
+			uvs[verticesIndex + 2] = new Vector2((points[i + 2].x - minX) / objWidth, zDistance);
+			uvs[verticesIndex + 3] = new Vector2((points[i + 2].x - minX) / objWidth, 0);
+			verticesIndex += 4;
+		}
+
+		uvs[verticesIndex] = new Vector2((points[points.Length - 2].x - minX) / objWidth, 0);
+		uvs[verticesIndex + 1] = new Vector2((points[points.Length - 2].x - minX) / objWidth, zDistance);
+		uvs[verticesIndex + 2] = new Vector2((points[points.Length - 1].x - minX) / objWidth, zDistance);
+		uvs[verticesIndex + 3] = new Vector2((points[points.Length - 1].x - minX) / objWidth, 0);
+		verticesIndex += 4;
+
+		for (int i = points.Length - 1; i > 2; i -= 2) {
+
+			uvs[verticesIndex] = new Vector2((points[i].x - minX) / objWidth, 0);
+			uvs[verticesIndex + 1] = new Vector2((points[i].x - minX) / objWidth, zDistance);
+			uvs[verticesIndex + 2] = new Vector2((points[i - 2].x - minX) / objWidth, zDistance);
+			uvs[verticesIndex + 3] = new Vector2((points[i - 2].x - minX) / objWidth, 0);
+			verticesIndex += 4;
+		}
+
+		uvs[verticesIndex] = new Vector2((points[1].x - minX) / objWidth, 0);
+		uvs[verticesIndex + 1] = new Vector2((points[1].x - minX) / objWidth, zDistance);
+		uvs[verticesIndex + 2] = new Vector2((points[0].x - minX) / objWidth, zDistance);
+		uvs[verticesIndex + 3] = new Vector2((points[0].x - minX) / objWidth, 0);
 
 		return uvs;
 	}

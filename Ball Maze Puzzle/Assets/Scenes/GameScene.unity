@@ -1473,6 +1473,7 @@ MonoBehaviour:
   goalPrefab: {fileID: 4134842967918266, guid: de67ae539d3120348a808636d64bfb1a, type: 2}
   levelCode: 123
   gridParent: {fileID: 2068127029}
+  obstacleMaterial: {fileID: 2100000, guid: be732c24d8851314f9e67c3e6d3d3873, type: 2}
 --- !u!114 &2021947496
 MonoBehaviour:
   m_ObjectHideFlags: 0

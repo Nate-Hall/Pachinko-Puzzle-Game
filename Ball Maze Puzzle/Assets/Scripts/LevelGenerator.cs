@@ -18,6 +18,8 @@ public class LevelGenerator : MonoBehaviour {
 
 	public Transform[,] cellTransforms;
 
+	public Material obstacleMaterial;
+
 	LevelDetails level;
 
 
@@ -155,6 +157,7 @@ public class LevelGenerator : MonoBehaviour {
 				foreach (Transform obj in obstacles) {
 					obj.parent = grid;
 					obj.localPosition = Vector3.zero;
+					obj.GetComponent<Renderer>().sharedMaterial = obstacleMaterial;
 				}
 				grid.localScale = Vector3.one * ((float)level.divisions / ((float)level.divisions + 1f));
 			}
