@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class LevelMeshGenerator {
 
-	const float obstacleFrontZ = -0.1f;
+	const float obstacleFrontZ = -0.15f;
 	const float obstacleBackZ = 0;
 
 	const int OBSTACLE_VALUE = 2;

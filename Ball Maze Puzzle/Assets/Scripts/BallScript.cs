@@ -44,12 +44,15 @@ public class BallScript : MonoBehaviour {
 
 
 	private void OnTriggerStay(Collider other) {
-		if(other.tag == "Goal") {
-			if(transform.localScale.x > 0) {
-				transform.localScale -= Vector3.one * shrinkSpeed * Time.deltaTime;
-			}
-			if (transform.localScale.x <= 0.005f) {
-				GameObject.FindGameObjectWithTag("PostPuzzleMenu").GetComponent<PostPuzzleMenuScript>().Activate();
+		if (active) {
+			if (other.tag == "Goal") {
+				if (transform.localScale.x > 0) {
+					transform.localScale -= Vector3.one * shrinkSpeed * Time.deltaTime;
+				}
+				if (transform.localScale.x <= 0.005f) {
+					active = false;
+					GameObject.FindGameObjectWithTag("PostPuzzleMenu").GetComponent<PostPuzzleMenuScript>().Activate();
+				}
 			}
 		}
 	}
