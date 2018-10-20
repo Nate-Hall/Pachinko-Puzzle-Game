@@ -1537,9 +1537,10 @@ MonoBehaviour:
   cellPrefab: {fileID: 4613807983928602, guid: 774229bd604c5e24e8f417e5fce796ef, type: 2}
   ballPrefab: {fileID: 4598078494315916, guid: 30020433cd5581a4da3e836796a96a0f, type: 2}
   goalPrefab: {fileID: 4134842967918266, guid: de67ae539d3120348a808636d64bfb1a, type: 2}
-  levelCode: 123
+  levelCode: 104
   gridParent: {fileID: 2068127029}
   obstacleMaterial: {fileID: 2100000, guid: be732c24d8851314f9e67c3e6d3d3873, type: 2}
+  physicMaterial: {fileID: 13400000, guid: 633427c2f58d0fe4cbe9b18c9e127616, type: 2}
 --- !u!114 &2021947496
 MonoBehaviour:
   m_ObjectHideFlags: 0

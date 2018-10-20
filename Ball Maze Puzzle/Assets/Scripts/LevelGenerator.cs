@@ -19,12 +19,14 @@ public class LevelGenerator : MonoBehaviour {
 	public Transform[,] cellTransforms;
 
 	public Material obstacleMaterial;
+	public PhysicMaterial physicMaterial;
 
 	LevelDetails level;
 
 
 
-	private void Start() {
+	private void Awake() {
+		Instantiate(backboard);
 		GenerateLevel();
 	}
 
@@ -122,8 +124,6 @@ public class LevelGenerator : MonoBehaviour {
 
 
 	void GenerateLevelObjects(LevelDetails level, bool shuffle) {
-		Instantiate(backboard, gridParent);
-
 		int[,] cellValues = new int[level.divisions, level.divisions];
 		cellTransforms = new Transform[level.rows, level.columns];
 
@@ -142,10 +142,12 @@ public class LevelGenerator : MonoBehaviour {
 
 						if(cellValues[j, i] == BALL_VALUE) {
 							Transform ball = (Transform)Instantiate(ballPrefab, gridParent);
-							ball.localPosition = new Vector3(grid.localPosition.x + -0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * (level.divisions - i)), grid.localPosition.y + -0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * (level.divisions - j)), -0.1f);
+							ball.localPosition = new Vector3(grid.localPosition.x + -0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * j), grid.localPosition.y + 0.55f, -0.1f);
 						} else if(cellValues[j, i] == GOAL_VALUE) {
 							Transform goal = (Transform)Instantiate(goalPrefab, grid);
-							goal.localPosition = new Vector3(-0.5f + (0.5f / (float)level.divisions) + ((1 / (float)level.divisions) * i), -0.5f + (0.5f / (float)level.divisions) + ((1 / (float)level.divisions) * j), -0.1f);
+							goal.localPosition = new Vector3(-0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * j), -0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * i), -0.1f);
+							Debug.Log(i.ToString());
+							Debug.Log(j.ToString());
 							isLocked = true;
 						}
 					}
@@ -158,6 +160,7 @@ public class LevelGenerator : MonoBehaviour {
 					obj.parent = grid;
 					obj.localPosition = Vector3.zero;
 					obj.GetComponent<Renderer>().sharedMaterial = obstacleMaterial;
+					obj.GetComponent<MeshCollider>().sharedMaterial = physicMaterial;
 				}
 				grid.localScale = Vector3.one * ((float)level.divisions / ((float)level.divisions + 1f));
 			}

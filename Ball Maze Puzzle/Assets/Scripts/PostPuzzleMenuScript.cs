@@ -9,6 +9,7 @@ public class PostPuzzleMenuScript : MonoBehaviour {
 	GameManager manager;
 	Button nextButton;
 	Animator anim;
+	Animator lidAnim;
 
 
 
@@ -16,6 +17,7 @@ public class PostPuzzleMenuScript : MonoBehaviour {
 		manager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
 		nextButton = transform.Find("NextButton").GetComponent<Button>();
 		anim = GetComponent<Animator>();
+		lidAnim = GameObject.FindGameObjectWithTag("Front").GetComponent<Animator>();
 	}
 
 
@@ -52,29 +54,55 @@ public class PostPuzzleMenuScript : MonoBehaviour {
 
 
 	public void OnReplayButtonClick() {
-		manager.ResetLevel();
+		StartCoroutine("RestartLevelAnimation");
 		Deactivate();
-		manager.SetInteractive(true);
 	}
 
 
 
 	public void OnNextButtonClick() {
 		if(manager.CanLoadNextLevel()) {
-			manager.LoadNextLevel();
+			StartCoroutine("LoadNextLevelAnimation");
 		} else {
 			OnMenuButtonClick();
 		}
 
 		Deactivate();
-		manager.SetInteractive(true);
 	}
 
 
 
 	IEnumerator FadeToMainMenu() {
+		lidAnim.SetTrigger("ClosePanel");
+		yield return new WaitForSeconds(1);
 		GameObject.FindGameObjectWithTag("ScreenFade").GetComponent<Animator>().SetTrigger("Darken");
 		yield return new WaitForSeconds(1);
 		SceneManager.LoadScene("MainMenu");
+	}
+
+
+
+	IEnumerator LoadNextLevelAnimation() {
+		lidAnim.SetTrigger("ClosePanel");
+		yield return new WaitForSeconds(1.5f);
+		manager.LoadNextLevel();
+		yield return new WaitForSeconds(0.1f);
+		lidAnim.SetTrigger("OpenPanel");
+		yield return new WaitForSeconds(1.5f);
+
+		manager.SetInteractive(true);
+	}
+
+
+
+	IEnumerator RestartLevelAnimation() {
+		lidAnim.SetTrigger("ClosePanel");
+		yield return new WaitForSeconds(1.5f);
+		manager.ResetLevel();
+		yield return new WaitForEndOfFrame();
+		lidAnim.SetTrigger("OpenPanel");
+		yield return new WaitForSeconds(1.5f);
+
+		manager.SetInteractive(true);
 	}
 }

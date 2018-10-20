@@ -201,7 +201,7 @@ public class LevelEditor : MonoBehaviour {
 		//Debug.Log(log);
 		levelEditorGridMaterial.mainTexture = GenerateTexture();
 
-		int[,] cellValues = new int[divisions, divisions];
+		/*int[,] cellValues = new int[divisions, divisions];
 		for (int row = 0; row < gridRows; row++) {
 			for (int column = 0; column < gridColumns; column++) {
 				for (int i = 0; i < divisions; i++) {
@@ -218,7 +218,7 @@ public class LevelEditor : MonoBehaviour {
 					obj.parent = grid;
 				}
 			}
-		}
+		}*/
 	}
 
 	Texture2D GenerateTexture() {
