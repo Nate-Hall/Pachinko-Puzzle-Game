@@ -23,11 +23,21 @@ public class LevelGenerator : MonoBehaviour {
 
 	LevelDetails level;
 
+	Transform currentBall;
+
 
 
 	private void Awake() {
 		Instantiate(backboard);
 		GenerateLevel();
+	}
+
+
+
+	private void Update() {
+		if (currentBall != null) {
+			obstacleMaterial.SetVector("Vector3_E271D2BB", currentBall.position);
+		}
 	}
 
 
@@ -43,6 +53,7 @@ public class LevelGenerator : MonoBehaviour {
 	public void RemoveLevel() {
 		foreach (Transform obj in gridParent.GetComponentsInChildren<Transform>()) {
 			if (obj != gridParent) {
+				currentBall = null;
 				Destroy(obj.gameObject);
 			}
 		}
@@ -143,6 +154,7 @@ public class LevelGenerator : MonoBehaviour {
 						if(cellValues[j, i] == BALL_VALUE) {
 							Transform ball = (Transform)Instantiate(ballPrefab, gridParent);
 							ball.localPosition = new Vector3(grid.localPosition.x + -0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * j), grid.localPosition.y + 0.55f, -0.1f);
+							currentBall = ball;
 						} else if(cellValues[j, i] == GOAL_VALUE) {
 							Transform goal = (Transform)Instantiate(goalPrefab, grid);
 							goal.localPosition = new Vector3(-0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * j), -0.5f + (0.5f / (float)level.divisions) + ((1f / (float)level.divisions) * i), -0.1f);
